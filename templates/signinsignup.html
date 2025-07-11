@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    :root {
+      --primary: #98b300;
+      --primary-dark: #879000;
+      --blue: #007bff;
+      --error: #dc3545;
+      --success: #28a745;
+      --gradient-bg: linear-gradient(to bottom right, #f7ffe2, #e6f4c7);
+    }
+
+    body {
+      margin: 0;
+      background: var(--gradient-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+      padding: 20px;
+    }
+
+    .container {
+      perspective: 1000px;
+      width: 400px;
+      height: 550px;
+    }
+
+    .switch-link {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .switch-link a {
+      color: var(--blue);
+      cursor: pointer;
+      text-decoration: underline;
+      margin: 0 10px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s;
+    }
+
+    .card.flip {
+      transform: rotateY(180deg);
+    }
+
+    .form-box {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+    }
+
+    .form-box h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .form-box form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-box input {
+      margin-bottom: 16px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fdfdfd;
+      font-size: 14px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(152, 179, 0, 0.2);
+    }
+
+    .form-box input.error {
+      border-color: var(--error);
+      background-color: #fff5f5;
+    }
+
+    .form-box input.error:focus {
+      box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+    }
+
+    .form-box button {
+      padding: 12px;
+      background: linear-gradient(135deg, #e1ff00, #98b300);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      position: relative;
+    }
+
+    .form-box button:hover:not(:disabled) {
+      background: linear-gradient(135deg, #566102, #889400);
+      transform: translateY(-1px);
+    }
+
+    .form-box button:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .form-box button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .form-box button.loading {
+      color: transparent;
+    }
+
+    .form-box button.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid #fff;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .back {
+      transform: rotateY(180deg);
+    }
+
+    .form-box label {
+      margin-bottom: 5px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .switch-btn {
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .switch-btn:hover {
+      background-color: rgba(152, 179, 0, 0.1);
+      color: var(--primary-dark);
+    }
+
+    /* Error and Success Messages */
+    .message {
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .message.success {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .message.warning {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Password strength indicator */
+    .password-strength {
+      margin-top: -12px;
+      margin-bottom: 16px;
+      font-size: 12px;
+    }
+
+    .strength-bar {
+      height: 4px;
+      background-color: #e0e0e0;
+      border-radius: 2px;
+      margin-bottom: 5px;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease, background-color 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .strength-text {
+      color: #666;
+      font-size: 11px;
+    }
+
+    /* Responsive design */
+    @media (max-width: 480px) {
+      .container {
+        width: 90%;
+        max-width: 400px;
+      }
+      
+      .form-box {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="switch-link">
+    <div class="switch-link">
+      <a class="switch-btn" onclick="showSignIn()">Sign In</a> |
+      <a class="switch-btn" onclick="showSignUp()">Sign Up</a>
+    </div>
+  </div>
+
+  <div class="card" id="card">
+    <!-- Sign In Form -->
+    <div class="form-box front">
+      <h2>Sign In</h2>
+      <div id="signin-message"></div>
+      <form id="signin-form">
+        <input type="text" id="signin-username" name="username" placeholder="Username" required />
+        <input type="password" id="signin-password" name="password" placeholder="Password" required />
+        <button type="submit" id="signin-btn">Sign In</button>
+      </form>
+    </div>
+
+    <!-- Sign Up Form -->
+    <div class="form-box back">
+      <h2>Sign Up</h2>
+      <div id="signup-message"></div>
+      <form id="signup-form">
+        <input type="text" id="signup-username" name="username" placeholder="Username" required />
+        <input type="text" id="signup-name" name="name" placeholder="Full Name" required />
+        <input type="email" id="signup-email" name="email" placeholder="Email" required />
+        <input type="password" id="signup-password" name="password" placeholder="Password (min 8 different characters)" required minlength="8" />
+        <div class="password-strength" id="password-strength" style="display: none;">
+          <div class="strength-bar">
+            <div class="strength-fill" id="strength-fill"></div>
+          </div>
+          <div class="strength-text" id="strength-text"></div>
+        </div>
+        <button type="submit" id="signup-btn">Sign Up</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const card = document.getElementById('card');
+  let isSubmitting = false;
+
+  function showSignUp() {
+    card.classList.add('flip');
+    clearMessages();
+  }
+
+  function showSignIn() {
+    card.classList.remove('flip');
+    clearMessages();
+  }
+
+  function clearMessages() {
+    document.getElementById('signin-message').innerHTML = '';
+    document.getElementById('signup-message').innerHTML = '';
+    
+    // Clear error states from inputs
+    document.querySelectorAll('input.error').forEach(input => {
+      input.classList.remove('error');
+    });
+  }
+
+  function showMessage(containerId, message, type = 'error') {
+    const container = document.getElementById(containerId);
+    container.innerHTML = `<div class="message ${type}">${message}</div>`;
+    
+    // Auto-hide success messages after 3 seconds
+    if (type === 'success') {
+      setTimeout(() => {
+        container.innerHTML = '';
+      }, 3000);
+    }
+  }
+
+  function setLoadingState(buttonId, isLoading) {
+    const button = document.getElementById(buttonId);
+    if (isLoading) {
+      button.classList.add('loading');
+      button.disabled = true;
+    } else {
+      button.classList.remove('loading');
+      button.disabled = false;
+    }
+  }
+
+  function addErrorToInput(inputId) {
+    document.getElementById(inputId).classList.add('error');
+  }
+
+  // Password strength checker with unique character validation
+  document.getElementById('signup-password').addEventListener('input', function() {
+    const password = this.value;
+    const strengthContainer = document.getElementById('password-strength');
+    const strengthFill = document.getElementById('strength-fill');
+    const strengthText = document.getElementById('strength-text');
+    
+    if (password.length === 0) {
+      strengthContainer.style.display = 'none';
+      return;
+    }
+    
+    strengthContainer.style.display = 'block';
+    
+    // Count unique characters
+    const uniqueChars = new Set(password).size;
+    
+    let score = 0;
+    let feedback = '';
+    
+    // Unique characters check (primary requirement)
+    if (uniqueChars >= 8) {
+      score += 2; // Give more weight to unique characters
+      feedback = `${uniqueChars} unique characters`;
+    } else {
+      feedback = `Need ${8 - uniqueChars} more unique characters (${uniqueChars}/8)`;
+    }
+    
+    // Length check
+    if (password.length >= 8) score++;
+    
+    // Complexity checks
+    if (/[a-z]/.test(password)) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    
+    // Set strength visual
+    const percentage = Math.min((score / 7) * 100, 100);
+    strengthFill.style.width = percentage + '%';
+    
+    if (uniqueChars < 8) {
+      strengthFill.style.backgroundColor = '#dc3545';
+      strengthText.textContent = feedback;
+    } else if (score < 5) {
+      strengthFill.style.backgroundColor = '#ffc107';
+      strengthText.textContent = 'Good - ' + feedback;
+    } else {
+      strengthFill.style.backgroundColor = '#28a745';
+      strengthText.textContent = 'Strong - ' + feedback;
+    }
+  });
+
+  // Function to validate unique characters
+  function validateUniqueCharacters(password) {
+    const uniqueChars = new Set(password).size;
+    return uniqueChars >= 8;
+  }
+
+  // Sign In Form Handler
+  document.getElementById("signin-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    
+    if (isSubmitting) return;
+    isSubmitting = true;
+    
+    clearMessages();
+    setLoadingState('signin-btn', true);
+    
+    const username = document.getElementById("signin-username").value.trim();
+    const password = document.getElementById("signin-password").value;
+    
+    // Basic validation
+    if (!username || !password) {
+      showMessage('signin-message', 'Please fill in all fields');
+      setLoadingState('signin-btn', false);
+      isSubmitting = false;
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password', password);
+    
+    try {
+      const response = await fetch('/signin', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        // Check if it's a redirect response
+        if (response.redirected || response.url.includes('/main.html')) {
+          sessionStorage.setItem("loggedInUser", username);
+          showMessage('signin-message', 'Sign in successful! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = `/main.html?user=${username}`;
+          }, 1000);
+        } else {
+          sessionStorage.setItem("loggedInUser", username);
+          window.location.href = `/main.html?user=${username}`;
+        }
+      } else {
+        const errorText = await response.text();
+        if (response.status === 401 || errorText.includes('Invalid login')) {
+          showMessage('signin-message', 'Wrong username or password');
+          addErrorToInput('signin-username');
+          addErrorToInput('signin-password');
+        } else {
+          showMessage('signin-message', 'Network issue or Server down');
+        }
+      }
+    } catch (error) {
+      console.error('Sign in error:', error);
+      showMessage('signin-message', 'Network issue or Server down');
+    } finally {
+      setLoadingState('signin-btn', false);
+      isSubmitting = false;
+    }
+  });
+
+  // Sign Up Form Handler
+  document.getElementById("signup-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    
+    if (isSubmitting) return;
+    isSubmitting = true;
+    
+    clearMessages();
+    setLoadingState('signup-btn', true);
+    
+    const username = document.getElementById("signup-username").value.trim();
+    const name = document.getElementById("signup-name").value.trim();
+    const email = document.getElementById("signup-email").value.trim();
+    const password = document.getElementById("signup-password").value;
+    
+    // Validation
+    if (!username || !name || !email || !password) {
+      showMessage('signup-message', 'Please fill in all fields');
+      setLoadingState('signup-btn', false);
+      isSubmitting = false;
+      return;
+    }
+    
+    if (password.length < 8) {
+      showMessage('signup-message', 'Password must be at least 8 characters long');
+      addErrorToInput('signup-password');
+      setLoadingState('signup-btn', false);
+      isSubmitting = false;
+      return;
+    }
+    
+    // Validate unique characters
+    if (!validateUniqueCharacters(password)) {
+      const uniqueCount = new Set(password).size;
+      showMessage('signup-message', `Password must contain at least 8 different characters. Currently has ${uniqueCount} unique characters.`);
+      addErrorToInput('signup-password');
+      setLoadingState('signup-btn', false);
+      isSubmitting = false;
+      return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showMessage('signup-message', 'Please enter a valid email address');
+      addErrorToInput('signup-email');
+      setLoadingState('signup-btn', false);
+      isSubmitting = false;
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('password', password);
+    
+    try {
+      const response = await fetch('/signup', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        showMessage('signup-message', 'Account created successfully! You can now sign in.', 'success');
+        document.getElementById("signup-form").reset();
+        document.getElementById('password-strength').style.display = 'none';
+        
+        // Auto-switch to sign in after 2 seconds
+        setTimeout(() => {
+          showSignIn();
+        }, 2000);
+      } else {
+        const errorText = await response.text();
+        if (response.status === 400 || errorText.includes('User already exists')) {
+          showMessage('signup-message', 'User already exists');
+          addErrorToInput('signup-username');
+        } else {
+          showMessage('signup-message', 'Network issue or Server down');
+        }
+      }
+    } catch (error) {
+      console.error('Sign up error:', error);
+      showMessage('signup-message', 'Network issue or Server down');
+    } finally {
+      setLoadingState('signup-btn', false);
+      isSubmitting = false;
+    }
+  });
+
+  // Clear session on page load
+  window.onload = function () {
+    sessionStorage.removeItem("loggedInUser");
+    clearMessages();
+  };
+
+  // Clear error states when user starts typing
+  document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', function() {
+      this.classList.remove('error');
+    });
+  });
+</script>
+
+</body>
+</html>

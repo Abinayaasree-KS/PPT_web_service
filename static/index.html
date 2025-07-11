@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Text to PPT Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    textarea, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #loading {
+      margin-top: 15px;
+      color: #444;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>Generate Animated PPT</h2>
+  <form id="pptForm" enctype="multipart/form-data">
+    <label for="text">Enter Text:</label>
+    <textarea id="text" rows="6" required placeholder="Enter your slide content here..."></textarea>
+
+    <label for="reference">Reference Link (optional):</label>
+    <input type="url" id="reference" placeholder="https://example.com">
+
+    <label for="image">Upload Image (optional):</label>
+    <input type="file" id="image" name="images" accept="image/*">
+
+    <label for="username">Username:</label>
+    <input type="text" id="username" placeholder="Enter your name" required>
+
+    <button type="submit">Generate PPT</button>
+    <div id="loading">Generating your PPT, please wait...</div>
+  </form>
+
+  <script>
+    const form = document.getElementById('pptForm');
+    const loading = document.getElementById('loading');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const text = document.getElementById('text').value.trim();
+      const reference = document.getElementById('reference').value.trim();
+      const imageFile = document.getElementById('image').files[0];
+      const username = document.getElementById('username').value.trim();
+
+      if (!text || !username) {
+        alert("Please enter both text and username.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('text', text);
+      formData.append('reference', reference);
+      formData.append('username', username);  // ✅ Required
+      if (imageFile) {
+        formData.append('images', imageFile);  // ✅ Should be 'images' to match FastAPI
+      }
+
+      loading.style.display = 'block';
+
+      try {
+        const response = await fetch('/generate-ppt', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'generated_ppt.pptx';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        } else {
+          const err = await response.text();
+          alert("Error: " + err);
+        }
+      } catch (error) {
+        alert('Backend unreachable or crashed.');
+        console.error(error);
+      } finally {
+        loading.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

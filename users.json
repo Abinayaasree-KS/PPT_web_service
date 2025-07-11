@@ -1,0 +1,52 @@
+{
+  "abi": {
+    "name": "abiks",
+    "password": "12345",
+    "email": "abisaran286@gmail.com"
+  },
+  "saran": {
+    "name": "saran",
+    "password": "1234567890",
+    "email": "saran@gmail.com"
+  },
+  "john": {
+    "name": "john",
+    "password": "44565",
+    "email": "john@gmail.com"
+  },
+  "abinaya": {
+    "name": "Abinayashri VS",
+    "password": "password",
+    "email": "vsabinayashri@gmail.com"
+  },
+  "harry": {
+    "name": "harry",
+    "password": "123456789",
+    "email": "harry@gmail.com"
+  },
+  "jacky": {
+    "name": "jacky",
+    "password": "1234567890",
+    "email": "jacky@gmail.com"
+  },
+  "seetha": {
+    "name": "seetha",
+    "password": "seetha@abi",
+    "email": "seetha@gmail"
+  },
+  "dhanvi": {
+    "name": "dhanvi",
+    "password": "Abi@286!",
+    "email": "dhanvi@gmail.com"
+  },
+  "rose": {
+    "name": "rose",
+    "password": "AbiKS@286",
+    "email": "rose@gmail.com"
+  },
+  "test": {
+    "name": "test",
+    "password": "AbiKs@286",
+    "email": "test@gmail.com"
+  }
+}
